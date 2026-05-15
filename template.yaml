@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless Expense Tracker
+
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 10
+    Environment:
+      Variables:
+        TABLE_NAME: Expenses
+
+Resources:
+
+  ExpensesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Expenses
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: expenseId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: expenseId
+          KeyType: RANGE
+
+  CreateExpenseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: backend/createExpense/index.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: Expenses
+      Events:
+        CreateExpense:
+          Type: Api
+          Properties:
+            Path: /expenses
+            Method: post
+
+  GetExpensesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: backend/getExpenses/index.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: Expenses
+      Events:
+        GetExpenses:
+          Type: Api
+          Properties:
+            Path: /expenses
+            Method: get
+
+  UpdateExpenseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: backend/updateExpense/index.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: Expenses
+      Events:
+        UpdateExpense:
+          Ty
